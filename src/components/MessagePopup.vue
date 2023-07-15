@@ -1,14 +1,16 @@
 <template>
-    <div v-if="isOpen" class="backdrop">
-    <div class="popup">
+  <div v-if="isOpen" class="backdrop" @click="close">
+    <div class="popup" @click.stop>
       <h1>Внимание!</h1>
       <hr />
       <slot></slot>
       <hr />
       <div class="footer">
-        <button>Отмена</button>
-        &nbsp;
-        <button>Ok</button>
+        <slot name="actions" :close="close" :confirm="confirm">
+          <button @click="close">Отмена</button>
+          &nbsp;
+          <button @click="confirm">Ok</button>
+        </slot>
       </div>
     </div>
   </div>
@@ -16,13 +18,36 @@
 
 <script>
 export default {
-    props: {
+  props: {
     isOpen: {
       type: Boolean,
       required: true,
     },
-  }
-}
+  },
+  emits: {
+    ok: null,
+    close: null,
+  },
+  mounted() {
+    document.addEventListener("keydown", this.handleKeyDown);
+  },
+  beforeUnmount() {
+    document.removeEventListener("keydown", this.handleKeyDown);
+  },
+  methods: {
+    handleKeyDown(e) {
+      if (this.isOpen && e.key === "Escape") {
+        this.close();
+      }
+    },
+    close() {
+      this.$emit("close");
+    },
+    confirm() {
+      this.$emit("ok");
+    },
+  },
+};
 </script>
 
 <style>
