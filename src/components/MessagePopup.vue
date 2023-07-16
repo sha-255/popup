@@ -18,15 +18,11 @@
 
 <script>
 export default {
-  props: {
-    isOpen: {
-      type: Boolean,
-      required: true,
-    },
-  },
-  emits: {
-    ok: null,
-    close: null,
+  currentPopupController: null,
+  data() {
+    return {
+      isOpen: false,
+    };
   },
   mounted() {
     document.addEventListener("keydown", this.handleKeyDown);
@@ -40,11 +36,24 @@ export default {
         this.close();
       }
     },
-    close() {
-      this.$emit("close");
+    open() {
+      let resolve;
+      let reject;
+      const popupPromise = new Promise((ok, fail) => {
+        resolve = ok;
+        reject = fail;
+      });
+      this.$options.currentPopupController = { resolve, reject };
+      this.isOpen = true;
+      return popupPromise;
     },
     confirm() {
-      this.$emit("ok");
+      this.$options.currentPopupController.resolve(true);
+      this.isOpen = false;
+    },
+    close() {
+      this.$options.currentPopupController.resolve(false);
+      this.isOpen = false;
     },
   },
 };

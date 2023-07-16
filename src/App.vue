@@ -1,10 +1,6 @@
 <template>
-  <button @click="openPopup">Open popup</button>
-  <message-popup
-    :is-open="isPopupOpen"
-    @ok="popupConfirmed"
-    @close="isPopupOpen = false"
-  >
+  <button @click="popupLogic">Open popup</button>
+  <message-popup ref="confirmationPopup">
     My someone text!
     <template #actions="{ confirm }">
       Write
@@ -22,7 +18,6 @@ export default {
   components: { MessagePopup },
   data() {
     return {
-      isPopupOpen: false,
       confirmation: "",
     };
   },
@@ -33,13 +28,12 @@ export default {
     },
   },
   methods: {
-    openPopup() {
+    async popupLogic() {
       this.confirmation = "";
-      this.isPopupOpen = true;
-    },
-    popupConfirmed() {
-      alert("Confirmed");
-      this.isPopupOpen = false;
+      const popupResult = await this.$refs.confirmationPopup.open();
+      if (popupResult) {
+        alert("Confirmed");
+      }
     },
   },
 };
